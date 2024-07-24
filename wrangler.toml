@@ -1,0 +1,17 @@
+# wrangler.toml
+
+name = "flare-forms"
+workers_dev = true
+compatibility_date = "2024-07-24"
+main = "src/index.js"
+
+account_id = "${CLOUDFLARE_ACCOUNT_ID}"
+
+[[d1_databases]]
+binding = "cloudflareD1"
+database_name = "${D1_DATABASE_NAME}"
+database_id = "${D1_DATABASE_ID}"
+
+migrations = [
+  { dir = "./migrations" }
+]
