@@ -1,21 +1,10 @@
 // src/index.js
 export default {
   async fetch(request) {
-    const allowedOrigins = [
-      'https://henselforcongress.com',
-      'https://sunbeam.henselforcongress.com',
-      'https://anedot.com'
-    ];
-
-    const origin = request.headers.get('Origin');
-    if (!allowedOrigins.includes(origin)) {
-      return new Response('Forbidden', { status: 403 });
-    }
-
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
-          'Access-Control-Allow-Origin': origin,
+          'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'POST, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type',
         },
@@ -49,7 +38,7 @@ export default {
       `).bind(first, last, email, zip, source_ip, source_url).run();
 
       return new Response('Signup successful', {
-        headers: { 'Access-Control-Allow-Origin': origin },
+        headers: { 'Access-Control-Allow-Origin': '*' },
       });
     } catch (err) {
       return new Response('Internal Server Error', { status: 500 });
