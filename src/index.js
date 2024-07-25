@@ -1,6 +1,6 @@
 // src/index.js
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     try {
       if (request.method === 'OPTIONS') {
         return new Response(null, {
@@ -33,7 +33,7 @@ export default {
 
       console.log(`Received data: ${JSON.stringify({ first, last, email, zip, source_ip, source_url })}`);
 
-      const db = cloudflareD1.getInstance();
+      const db = env.cloudflareD1;
 
       console.log('Database instance acquired.');
 
