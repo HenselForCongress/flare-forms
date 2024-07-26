@@ -1,11 +1,21 @@
-// src/index.js
 export default {
   async fetch(request, env) {
+    const allowedOrigins = [
+      'https://henselforcongress.com',
+      /\.henselforcongress\.com$/
+    ];
+
+    const origin = request.headers.get('Origin');
+
+    if (!isAllowedOrigin(origin, allowedOrigins)) {
+      return new Response('Forbidden', { status: 403 });
+    }
+
     try {
       if (request.method === 'OPTIONS') {
         return new Response(null, {
           headers: {
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': origin,
             'Access-Control-Allow-Methods': 'POST, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type',
           },
@@ -31,21 +41,15 @@ export default {
       const source_ip = request.headers.get('CF-Connecting-IP');
       const source_url = request.headers.get('Referer');
 
-      console.log(`Received data: ${JSON.stringify({ first, last, email, zip, source_ip, source_url })}`);
-
       const db = env.cloudflareD1;
-
-      console.log('Database instance acquired.');
 
       const result = await db.prepare(`
         INSERT INTO signups (first_name, last_name, email_address, zip_code, source_ip, source_url)
         VALUES (?, ?, ?, ?, ?, ?)
       `).bind(first, last, email, zip, source_ip, source_url).run();
 
-      console.log(`Database insertion result: ${JSON.stringify(result)}`);
-
       return new Response('Signup successful', {
-        headers: { 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Access-Control-Allow-Origin': origin },
       });
     } catch (err) {
       console.error('Error occurred:', err);
@@ -53,3 +57,14 @@ export default {
     }
   },
 };
+
+function isAllowedOrigin(origin, allowedOrigins) {
+  return allowedOrigins.some(allowedOrigin => {
+    if (typeof allowedOrigin === 'string') {
+      return origin === allowedOrigin;
+    } else if (allowedOrigin instanceof RegExp) {
+      return allowedOrigin.test(origin);
+    }
+    return false;
+  });
+}
