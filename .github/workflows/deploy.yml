@@ -1,4 +1,4 @@
-# .github/workflows/deploy.yml
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 name: Deploy
 
 on:
@@ -20,6 +20,15 @@ jobs:
           sed -i 's/${CLOUDFLARE_ACCOUNT_ID}/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/g' wrangler.toml
           sed -i 's/${D1_DATABASE_NAME}/${{ secrets.D1_DATABASE_NAME }}/g' wrangler.toml
           sed -i 's/${D1_DATABASE_ID}/${{ secrets.D1_DATABASE_ID }}/g' wrangler.toml
+          sed -i 's/${FROM_EMAIL}/${{ secrets.FROM_EMAIL }}/g' wrangler.toml
+          sed -i 's/${DESTINATION_EMAIL}/${{ secrets.DESTINATION_EMAIL }}/g' wrangler.toml
+          sed -i 's/${CLOUDFLARE_ACCESS_CLIENT_ID}/${{ secrets.CLOUDFLARE_ACCESS_CLIENT_ID }}/g' wrangler.toml
+          sed -i 's/${CLOUDFLARE_ACCESS_CLIENT_SECRET}/${{ secrets.CLOUDFLARE_ACCESS_CLIENT_SECRET }}/g' wrangler.toml
+
+      - name: Handle URLs
+        run: |
+          ESP_URI=$(echo '${{ secrets.ESP_URL }}' | sed 's/[\/&]/\\&/g')
+          sed -i "s#\${ESP_URL}#${ESP_URI}#g" wrangler.toml
 
       - name: Apply Migrations
         run: wrangler d1 migrations apply cloudflareD1 --remote

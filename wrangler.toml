@@ -15,3 +15,16 @@ database_id = "${D1_DATABASE_ID}"
 migrations = [
   { dir = "./migrations" }
 ]
+
+# Email binding
+send_email = [
+  { type = "send_email", name = "SEB" }
+]
+
+# Vars
+[vars]
+  FROM_EMAIL = "${FROM_EMAIL}"
+  DESTINATION_EMAIL = "${DESTINATION_EMAIL}"
+  ESP_URL = "${ESP_URL}"
+  CLOUDFLARE_ACCESS_CLIENT_ID = "${CLOUDFLARE_ACCESS_CLIENT_ID}"
+  CLOUDFLARE_ACCESS_CLIENT_SECRET = "${CLOUDFLARE_ACCESS_CLIENT_SECRET}"
