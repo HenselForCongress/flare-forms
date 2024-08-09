@@ -75,9 +75,10 @@ export default {
       const listmonkResponse = await fetch(`${env.ESP_URL}/api/subscribers`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + btoa(`${env.CLOUDFLARE_ACCESS_CLIENT_ID}:${env.CLOUDFLARE_ACCESS_CLIENT_SECRET}`)
-        },
+            'Content-Type': 'application/json',
+            'CF-Access-Client-Id': env.CLOUDFLARE_ACCESS_CLIENT_ID,
+            'CF-Access-Client-Secret': env.CLOUDFLARE_ACCESS_CLIENT_SECRET
+          },
         body: JSON.stringify(listmonkData)
       });
 
