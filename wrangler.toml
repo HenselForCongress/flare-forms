@@ -24,6 +24,9 @@ send_email = [
 # Logs
 logpush = true
 
+# Sentry Monitoring
+tail_consumers = [{service = "flare-forms-tail"}]
+
 # Vars
 [vars]
   FROM_EMAIL = "${FROM_EMAIL}"

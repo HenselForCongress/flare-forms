@@ -81,11 +81,21 @@ export default {
         body: JSON.stringify(listmonkData)
       });
 
-      // Log the response from Listmonk
-      const responseBody = await listmonkResponse.json();
-      console.log('Received Listmonk response:', responseBody);
+      // Log the raw response status and body
+      console.log('Listmonk response status:', listmonkResponse.status);
+      const rawResponseBody = await listmonkResponse.text(); // get raw text response
+      console.log('Raw response from Listmonk:', rawResponseBody);
 
-      // Check for a successful response
+      // Attempt to parse the response as JSON
+      let responseBody;
+      try {
+        responseBody = JSON.parse(rawResponseBody);
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        return new Response('Error occurred while adding subscriber to Listmonk: Invalid response from Listmonk', { status: 500 });
+      }
+
+      // Log and check for a successful response
       if (!listmonkResponse.ok) {
         console.error('Failed to add subscriber to Listmonk:', responseBody);
         return new Response('Error occurred while adding subscriber to Listmonk', { status: 500 });
