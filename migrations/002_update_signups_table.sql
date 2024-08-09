@@ -1,10 +1,24 @@
 -- migrations/002_update_signups_table.sql
 
--- Add new columns
-ALTER TABLE signups ADD COLUMN message TEXT;
-ALTER TABLE signups ADD COLUMN form_name TEXT;
-ALTER TABLE signups ADD COLUMN user_agent TEXT;
+-- Drop the existing signups table
+DROP TABLE IF EXISTS signups;
 
--- Change the data type of created_at and updated_at to TIMESTAMPTZ
-ALTER TABLE signups ALTER COLUMN created_at TYPE TIMESTAMPTZ USING created_at AT TIME ZONE 'UTC';
-ALTER TABLE signups ALTER COLUMN updated_at TYPE TIMESTAMPTZ USING updated_at AT TIME ZONE 'UTC';
+-- Re-create the signups table with all desired columns
+CREATE TABLE signups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name TEXT,
+    last_name TEXT,
+    email_address TEXT NOT NULL,
+    zip_code TEXT,
+    source_ip TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    source_url TEXT,
+    message TEXT,
+    form_name TEXT,
+    user_agent TEXT,
+    country TEXT,
+    region TEXT,
+    city TEXT,
+    timezone TEXT
+);
