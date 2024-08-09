@@ -21,6 +21,9 @@ send_email = [
   { type = "send_email", name = "SEB" }
 ]
 
+# Logs
+logpush = true
+
 # Vars
 [vars]
   FROM_EMAIL = "${FROM_EMAIL}"

@@ -2,7 +2,7 @@ export default {
   async fetch(request, env) {
     const allowedOrigins = [
       'https://henselforcongress.com',
-      /\\.henselforcongress\\.com$/
+      /\\\\.henselforcongress\\\\.com$/
     ];
 
     const origin = request.headers.get('Origin');
@@ -54,23 +54,25 @@ export default {
       `).bind(first, last, email, zip, source_ip, source_url, country, region, city, timezone).run();
 
       const listmonkData = {
-          email: email,
-          name: `${first} ${last}`,
-          status: 'enabled',
-          lists: [6], // List ID for the subscription
-          attribs: {
-            // Add future fields here
-            source_ip: source_ip,
-            source_url: source_url,
-            zip: zip,
-            city: city,
-            region: region,
-            country: country,
-            timezone: timezone
-          }
-        };
+        email: email,
+        name: `${first} ${last}`,
+        status: 'enabled',
+        lists: [6], // List ID for the subscription
+        attribs: {
+          source_ip: source_ip,
+          source_url: source_url,
+          zip: zip,
+          city: city,
+          region: region,
+          country: country,
+          timezone: timezone
+        }
+      };
 
-      const listmonkResponse = fetch(`${env.ESP_URL}/api/subscribers`, {
+      // Log the data being sent to Listmonk
+      console.log('Sending the following data to Listmonk:', JSON.stringify(listmonkData, null, 2));
+
+      const listmonkResponse = await fetch(`${env.ESP_URL}/api/subscribers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,6 +80,16 @@ export default {
         },
         body: JSON.stringify(listmonkData)
       });
+
+      // Log the response from Listmonk
+      const responseBody = await listmonkResponse.json();
+      console.log('Received Listmonk response:', responseBody);
+
+      // Check for a successful response
+      if (!listmonkResponse.ok) {
+        console.error('Failed to add subscriber to Listmonk:', responseBody);
+        return new Response('Error occurred while adding subscriber to Listmonk', { status: 500 });
+      }
 
       // Wait for both requests to complete
       await Promise.allSettled([dbResult, listmonkResponse]);
