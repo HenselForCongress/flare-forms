@@ -2,7 +2,7 @@ export default {
   async fetch(request, env) {
     const allowedOrigins = [
       'https://henselforcongress.com',
-      /\\\\.henselforcongress\\\\.com$/
+      /\.henselforcongress\.com$/
     ];
 
     const origin = request.headers.get('Origin');
@@ -53,58 +53,57 @@ export default {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(first, last, email, zip, source_ip, source_url, country, region, city, timezone).run();
 
-      const listmonkData = {
-        email: email,
-        name: `${first} ${last}`,
-        status: 'enabled',
-        lists: [6], // List ID for the subscription
-        attribs: {
-          source_ip: source_ip,
-          source_url: source_url,
-          zip: zip,
-          city: city,
-          region: region,
-          country: country,
-          timezone: timezone
-        }
-      };
+      // If the database operation is successful, continue with Listmonk
+      try {
+        const listmonkData = {
+          email: email,
+          name: `${first} ${last}`,
+          status: 'enabled',
+          lists: [6], // List ID for the subscription
+          attribs: {
+            source_ip: source_ip,
+            source_url: source_url,
+            zip: zip,
+            city: city,
+            region: region,
+            country: country,
+            timezone: timezone
+          }
+        };
 
-      // Log the data being sent to Listmonk
-      console.log('Sending the following data to Listmonk:', JSON.stringify(listmonkData, null, 2));
+        // Log the data being sent to Listmonk
+        console.log('Sending the following data to Listmonk:', JSON.stringify(listmonkData, null, 2));
 
-      const listmonkResponse = await fetch(`${env.ESP_URL}/api/subscribers`, {
-        method: 'POST',
-        headers: {
+        const listmonkResponse = await fetch(`${env.ESP_URL}/api/subscribers`, {
+          method: 'POST',
+          headers: {
             'Content-Type': 'application/json',
             'CF-Access-Client-Id': env.CLOUDFLARE_ACCESS_CLIENT_ID,
             'CF-Access-Client-Secret': env.CLOUDFLARE_ACCESS_CLIENT_SECRET
           },
-        body: JSON.stringify(listmonkData)
-      });
+          body: JSON.stringify(listmonkData)
+        });
 
-      // Log the raw response status and body
-      console.log('Listmonk response status:', listmonkResponse.status);
-      const rawResponseBody = await listmonkResponse.text(); // get raw text response
-      console.log('Raw response from Listmonk:', rawResponseBody);
+        // Log the raw response status and body
+        console.log('Listmonk response status:', listmonkResponse.status);
+        const rawResponseBody = await listmonkResponse.text();
+        console.log('Raw response from Listmonk:', rawResponseBody);
 
-      // Attempt to parse the response as JSON
-      let responseBody;
-      try {
-        responseBody = JSON.parse(rawResponseBody);
-      } catch (jsonError) {
-        console.error('Failed to parse JSON response:', jsonError);
-        return new Response('Error occurred while adding subscriber to Listmonk: Invalid response from Listmonk', { status: 500 });
+        if (!listmonkResponse.ok) {
+          const responseBody = JSON.parse(rawResponseBody);
+          console.error('Failed to add subscriber to Listmonk:', responseBody);
+
+          if (listmonkResponse.status === 409) {
+            console.log('Email already exists in Listmonk, continuing...');
+          } else {
+            console.error('An error occurred with Listmonk:', responseBody);
+          }
+        }
+      } catch (err) {
+        console.error('Error occurred while communicating with Listmonk:', err);
       }
 
-      // Log and check for a successful response
-      if (!listmonkResponse.ok) {
-        console.error('Failed to add subscriber to Listmonk:', responseBody);
-        return new Response('Error occurred while adding subscriber to Listmonk', { status: 500 });
-      }
-
-      // Wait for both requests to complete
-      await Promise.allSettled([dbResult, listmonkResponse]);
-
+      // Return a success response if the database write was successful
       return new Response('Signup successful', {
         headers: { 'Access-Control-Allow-Origin': origin },
       });
