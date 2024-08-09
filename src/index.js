@@ -59,7 +59,7 @@ export default {
           email: email,
           name: `${first} ${last}`,
           status: 'enabled',
-          lists: [6], // List ID for the subscription
+          lists: [2], // List ID for the subscription
           attribs: {
             source_ip: source_ip,
             source_url: source_url,
